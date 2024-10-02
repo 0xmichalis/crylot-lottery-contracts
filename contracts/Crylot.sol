@@ -1,11 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.9;
+pragma solidity ^0.8.19;
 
-import '@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol';
-import '@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol';
-import '@chainlink/contracts/src/v0.8/ConfirmedOwner.sol';
+import {VRFCoordinatorV2Interface} from '@chainlink/contracts/src/v0.8/vrf/interfaces/VRFCoordinatorV2Interface.sol';
+import {VRFConsumerBaseV2Plus} from '@chainlink/contracts/src/v0.8/vrf/dev/VRFConsumerBaseV2Plus.sol';
 
-contract Crylot is VRFConsumerBaseV2, ConfirmedOwner{
+contract Crylot is VRFConsumerBaseV2Plus {
 
     // ---------- CHAINLINK CRF SETTINGS ---------- 
     VRFCoordinatorV2Interface COORDINATOR;
@@ -16,8 +15,7 @@ contract Crylot is VRFConsumerBaseV2, ConfirmedOwner{
     uint64 s_subscriptionId;
 
     constructor(bytes32 _keyHash, address _vrfConsumer, uint64 subscriptionId)
-    VRFConsumerBaseV2(_vrfConsumer)
-    ConfirmedOwner(msg.sender)
+        VRFConsumerBaseV2Plus(_vrfConsumer)
     {
         COORDINATOR = VRFCoordinatorV2Interface(_vrfConsumer);
         s_subscriptionId = subscriptionId;
@@ -34,7 +32,7 @@ contract Crylot is VRFConsumerBaseV2, ConfirmedOwner{
     }
     mapping(uint256 => Bet) public bets; /* requestId --> requestStatus */
 
-    function fulfillRandomWords(uint256 _betId, uint256[] memory _randomWords) internal override {
+    function fulfillRandomWords(uint256 _betId, uint256[] calldata _randomWords) internal override {
         bets[_betId].fulfilled = true;
         bets[_betId].vrfNumber = _randomWords;
 
