@@ -5,13 +5,12 @@ import {VRFConsumerBaseV2Plus} from '@chainlink/contracts/src/v0.8/vrf/dev/VRFCo
 import {VRFV2PlusClient} from "@chainlink/contracts/src/v0.8/vrf/dev/libraries/VRFV2PlusClient.sol";
 
 contract Crylot is VRFConsumerBaseV2Plus {
-
     // ---------- CHAINLINK VRF SETTINGS ----------
-    bytes32 keyHash;
-    uint32 callbackGasLimit = 100000;
-    uint16 requestConfirmations = 3;
-    uint32 numWords = 1;
-    uint64 s_subscriptionId;
+    bytes32 immutable public keyHash;
+    uint32 constant public callbackGasLimit = 100000;
+    uint16 constant public requestConfirmations = 3;
+    uint32 constant public numWords = 1;
+    uint64 immutable public s_subscriptionId;
 
     // ----------  BET SETTINGS ----------
     event BetDone();
