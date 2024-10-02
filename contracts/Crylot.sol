@@ -148,15 +148,15 @@ contract Crylot is VRFConsumerBaseV2Plus {
     function isInPause() public view returns (bool) {
         return isPaused;
     }
-    function setPaused(bool pause) public onlyOwner{
+    function setPaused(bool pause) public onlyOwner {
         isPaused = pause;
     }
 
-    function getFunds(address _addr) public view returns (uint256){
+    function getFunds(address _addr) public view returns (uint256) {
         return userFunds[_addr];
     }
 
-    function withdrawUserFunds() public payable noReentrancy{
+    function withdrawUserFunds() public payable noReentrancy {
         uint256 funds = userFunds[msg.sender];
         require(getBalance() > funds, "The contract has no liquidity");
         require(funds > 0, "You do not have any funds");
@@ -172,7 +172,7 @@ contract Crylot is VRFConsumerBaseV2Plus {
         return address(this).balance;
     }
 
-    function withdraw(address _addr) public payable onlyAdmin{
+    function withdraw(address _addr) public payable onlyAdmin {
         uint256 balance = getBalance();
         require(balance > 0, "The balance is 0");
         (bool success,) = (_addr).call{value:balance}("");
