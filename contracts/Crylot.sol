@@ -1,23 +1,42 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import {VRFCoordinatorV2Interface} from '@chainlink/contracts/src/v0.8/vrf/interfaces/VRFCoordinatorV2Interface.sol';
 import {VRFConsumerBaseV2Plus} from '@chainlink/contracts/src/v0.8/vrf/dev/VRFConsumerBaseV2Plus.sol';
+import {VRFV2PlusClient} from "@chainlink/contracts/src/v0.8/vrf/dev/libraries/VRFV2PlusClient.sol";
 
 contract Crylot is VRFConsumerBaseV2Plus {
 
     // ---------- CHAINLINK CRF SETTINGS ---------- 
-    VRFCoordinatorV2Interface COORDINATOR;
     bytes32 keyHash;
     uint32 callbackGasLimit = 100000;
     uint16 requestConfirmations = 3;
     uint32 numWords = 1;
     uint64 s_subscriptionId;
 
-    constructor(bytes32 _keyHash, address _vrfConsumer, uint64 subscriptionId)
-        VRFConsumerBaseV2Plus(_vrfConsumer)
+    // ----------  BET SETTINGS ----------
+    event BetDone();
+    event NumberGuessed(address _addr, bool guessed, uint256 number, uint256 winningNumber);
+    event WithdrawnUserFunds(address _addr, uint256 funds);
+    event WithdrawnBalance(address _addr, uint256 quantity);
+
+    uint256 minBet = 0.001 ether;
+    uint256 maxBet = 0.1 ether;
+    uint256 totalBets = 0;
+
+    bool isPaused = false;
+
+    mapping(address => uint256) userFunds;
+    mapping(address => uint256) userBets;
+
+    // -/ SET GAME DIFFICULTIES \-
+    // categorie => reward
+    // BRONZE - EMERALD - DIAMOND
+    uint256[3] categories = [7, 35, 70];
+    uint256[3] range = [10, 50, 100];
+
+    constructor(bytes32 _keyHash, address _vrfCoordinator, uint64 subscriptionId)
+        VRFConsumerBaseV2Plus(_vrfCoordinator)
     {
-        COORDINATOR = VRFCoordinatorV2Interface(_vrfConsumer);
         s_subscriptionId = subscriptionId;
         keyHash = _keyHash;
     }
@@ -45,28 +64,6 @@ contract Crylot is VRFConsumerBaseV2Plus {
         emit NumberGuessed(req._addr, req.number == randomNumber, req.number, randomNumber);
         emit BetDone();
     }
-
-    // ----------  BET SETTINGS ---------- 
-    event BetDone();
-    event NumberGuessed(address _addr, bool guessed, uint256 number, uint256 winningNumber);
-    event WithdrawnUserFunds(address _addr, uint256 funds);
-    event WithdrawnBalance(address _addr, uint256 quantity);
-
-    uint256 minBet = 0.001 ether;
-    uint256 maxBet = 0.1 ether;
-    uint256 totalBets = 0;
-
-    bool isPaused = false;
-
-    mapping(address => uint256) userFunds;
-    mapping(address => uint256) userBets;
-
-    // -/ SET GAME DIFFICULTIES \-
-    // categorie => reward
-    // BRONZE - EMERALD - DIAMOND
-    uint256[3] categories = [7, 35, 70];
-    uint256[3] range = [10, 50, 100];
-
 
     modifier onlyAdmin() {
         require(
@@ -97,12 +94,20 @@ contract Crylot is VRFConsumerBaseV2Plus {
         require(msg.value >= minBet, "The bet must be higher or equal than min bet");
         require(msg.value <= maxBet, "The bet must be lower or equal than max bet");
 
-        betId = COORDINATOR.requestRandomWords(
-            keyHash,
-            s_subscriptionId,
-            requestConfirmations,
-            callbackGasLimit,
-            numWords
+        betId = s_vrfCoordinator.requestRandomWords(
+            VRFV2PlusClient.RandomWordsRequest({
+                keyHash: keyHash,
+                subId: s_subscriptionId,
+                requestConfirmations: requestConfirmations,
+                callbackGasLimit: callbackGasLimit,
+                numWords: numWords,
+                extraArgs: VRFV2PlusClient._argsToBytes(
+                    VRFV2PlusClient.ExtraArgsV1({
+                        // TODO: likely switch to native payments
+                        nativePayment: false
+                    })
+                )
+            })
         );
         bets[betId] = Bet(new uint256[](0), false, msg.sender, msg.value, number, category);
 
