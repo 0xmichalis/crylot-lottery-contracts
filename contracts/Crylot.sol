@@ -52,7 +52,7 @@ contract Crylot is VRFConsumerBaseV2Plus {
     event WithdrawnUserFunds(address _addr, uint256 funds);
     event WithdrawnBalance(address _addr, uint256 quantity);
 
-    uint256 minBet = 0.005 ether;
+    uint256 minBet = 0.001 ether;
     uint256 maxBet = 0.1 ether;
     uint256 totalBets = 0;
 
