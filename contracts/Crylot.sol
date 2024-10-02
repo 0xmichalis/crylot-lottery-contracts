@@ -6,7 +6,7 @@ import {VRFV2PlusClient} from "@chainlink/contracts/src/v0.8/vrf/dev/libraries/V
 
 contract Crylot is VRFConsumerBaseV2Plus {
 
-    // ---------- CHAINLINK CRF SETTINGS ---------- 
+    // ---------- CHAINLINK VRF SETTINGS ----------
     bytes32 keyHash;
     uint32 callbackGasLimit = 100000;
     uint16 requestConfirmations = 3;
