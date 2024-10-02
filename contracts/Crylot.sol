@@ -10,7 +10,7 @@ contract Crylot is VRFConsumerBaseV2Plus {
     uint32 constant public callbackGasLimit = 100000;
     uint16 constant public requestConfirmations = 3;
     uint32 constant public numWords = 1;
-    uint64 immutable public s_subscriptionId;
+    uint256 immutable public s_subscriptionId;
 
     // ----------  BET SETTINGS ----------
     event BetDone();
@@ -33,7 +33,7 @@ contract Crylot is VRFConsumerBaseV2Plus {
     uint256[3] categories = [7, 35, 70];
     uint256[3] range = [10, 50, 100];
 
-    constructor(bytes32 _keyHash, address _vrfCoordinator, uint64 subscriptionId)
+    constructor(bytes32 _keyHash, address _vrfCoordinator, uint256 subscriptionId)
         VRFConsumerBaseV2Plus(_vrfCoordinator)
     {
         s_subscriptionId = subscriptionId;
